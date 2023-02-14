@@ -51,6 +51,13 @@ export class UserService {
     // return await this.userRepository.query('select * from user');
   }
 
+  async findOneByLoginName(loginName: string):Promise<User[]> {
+    return await this.userRepository.find({
+      where: {
+        loginName: loginName
+      }
+    });
+  }
   async findOne(id: number) {
     return await this.userRepository.find({
       where: {

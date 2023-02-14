@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 import { MenuModule } from './menu/menu.module';
 import { RoleModule } from './role/role.module';
 import { UserRoleModule } from './user_role/user_role.module';
@@ -27,6 +28,7 @@ import { join } from 'path';
     }),
     // 子模块
     UserModule,
+    AuthModule,
     MenuModule,
     RoleModule,
     UserRoleModule,
