@@ -5,6 +5,8 @@ import { User } from '../entities/User.entity';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
+// 测试加密
+import { Encrypt } from 'src/utils/crypto'
 // import { User } from 'src/entities/User.entity';
 
 @Injectable()
@@ -17,22 +19,31 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) { }
 
-  userLogin() {
-    return `test user/saerch`;
-  }
-
-  create(createUserDto: CreateUserDto) {
-    const { userName,loginName, password } = createUserDto;
-
+  /**
+   * @description: 创建用户
+   * @param createUserDto 
+   * @returns 
+   */
+  async create(createUserDto: CreateUserDto) {
+    const { userName, loginName, password } = createUserDto;
+    const userInfo = await this.findOneByLoginName(loginName);
+    if (userInfo.length > 0) {
+      return { flag: false, msg: "登录名已存在" }
+    }
     const user = new User();
     user.userName = userName;
     user.loginName = loginName;
-    user.password = password;
+    user.password = Encrypt(password);
     user.sex = 1;
-    
+
     return this.userRepository.save(user);
   }
 
+  /**
+   * @description: 查询所有用户
+   * @param query 
+   * @returns 
+   */
   async findAll(query: { keyWord: string, pageCurrent: number, pageSize: number }) {
     // async findAll(query: { keyWord: string, pageCurrent: number, pageSize: number }): Promise<User[]> {
     const list = await this.userRepository.find({
@@ -51,7 +62,12 @@ export class UserService {
     // return await this.userRepository.query('select * from user');
   }
 
-  async findOneByLoginName(loginName: string):Promise<User[]> {
+  /**
+   * @description: 查询是否存在此用户，登录名不重复
+   * @param loginName 
+   * @returns 
+   */
+  async findOneByLoginName(loginName: string): Promise<User[]> {
     return await this.userRepository.find({
       where: {
         loginName: loginName

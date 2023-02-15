@@ -25,13 +25,16 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
 
   handleRequest(err, user, info) {
     // You can throw an exception based on either "info" or "err" arguments
+    console.log(err, user, info);
+    
     if (err || !user) {
       throw err || new UnauthorizedException();
     }
     return user;
   }
 }
-// 生成跳过检测装饰器
+// swager装饰器：需要验证token的controller中增加装饰器@ApiBearerAuth，增加后swager请求header会携带Authorization参数。
+// 生成跳过检测装饰器 @SkipAuth()
 export const IS_PUBLIC_KEY = "isPublic";
 export const SkipAuth = () => SetMetadata(IS_PUBLIC_KEY, true);
 

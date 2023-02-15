@@ -13,7 +13,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
   intercept(context: ExecutionContext, next: CallHandler): Observable<Response<T>> {
     const request = context.switchToHttp().getRequest<Request>()
     return next.handle().pipe(map(data => {
-      console.log(request.url, data,'正常接口请求')
+      console.log(request.url, '正常接口请求')
       let msg = ''
       switch (request.method) {
         case 'GET':

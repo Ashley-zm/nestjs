@@ -12,6 +12,7 @@ import { JwtStrategy } from "./jwt.strategy";
   imports: [
     JwtModule.register({
       secret: JWT_CONSTANT.secret,
+      signOptions: { expiresIn: '4h' }
     }),
     // 使用 UserModule 的内容
     UserModule

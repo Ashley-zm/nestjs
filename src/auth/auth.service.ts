@@ -1,8 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { User } from "../entities/User.entity";
-// import { User } from "src/interfaces/user.interface";
-import  { Decrypt } from 'src/utils/crypto'
+import { LoginUserDto } from "./dto/login-user.dto";
+import { Encrypt } from 'src/utils/crypto'
 import { UserService } from "../user/user.service";
 
 const logger = new Logger("auth.service");
@@ -12,47 +11,39 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private jwtService: JwtService
-  ) {}
+  ) { }
 
   /**
    * @description: 用户登录
-   * @param {User} user
+   * @param {User} loginUserDto
    * @return {*}
    */
-  public async login(user: User) {
-    let data={code: -1, msg: "用户不存在" }
+  public async login(loginUserDto: LoginUserDto) {
+    let data = {}
     try {
-      const loginName: string = user.loginName;
-      const password: string = user.password;
-      console.log("-------",user);
-      
+      const loginName: string = loginUserDto.loginName;
+      const password: string = loginUserDto.password;
+
       const userInfo = await this.userService.findOneByLoginName(loginName);
-      console.log("dddddddddd",userInfo);
-      console.log("dddddddddd",userInfo[0]);
-      
-      if (!userInfo) {
-        data={ code: -1, msg: "用户不存在" };
-        return data
-        // return { code: -1, msg: "用户不存在" };
-        
+      if (userInfo.length === 0) {
+        data = { flag: false, msg: "用户不存在" };
+        return;
       }
-      // 解密
-      // const pass = Decrypt(password);
-      // if (pass === userInfo.password) {
-      //   return {
-      //     code: 1,
-      //     msg: "登录成功",
-      //     data: {
-      //       userId: `${userInfo.id}`,
-      //       token: await this.createToken(userInfo),
-      //     },
-      //   };
-      // } else {
-      //   return { code: -1, msg: "用户名密码错误" };
-      // }
+      // 加密
+      const pass = Encrypt(password)
+      if (pass === userInfo[0].password) {
+        data = {
+          flag: true,
+          msg: "登录成功",
+          userId: userInfo[0],
+          token: await this.createToken(userInfo[0]),
+        };
+      } else {
+        data = { flag: false, msg: "用户名密码错误" };
+      }
     } catch (error) {
       logger.log(error);
-      return { code: -1, msg: "登录失败" };
+      data = { flag: false, msg: "登录失败" };
     } finally {
       return data;
     }
@@ -60,11 +51,11 @@ export class AuthService {
 
   /**
    * @description:创建token
-   * @param {User} user
-   * @return {*}
+   * @param loginUserDto 
+   * @returns 
    */
-  private async createToken(user: User) {
-    const payload = { loginName: user.loginName, userId: `${user.id}` };
+  private async createToken(loginUserDto: LoginUserDto) {
+    const payload = { loginName: loginUserDto.loginName, id: loginUserDto.id };
     return this.jwtService.sign(payload);
   }
 }
