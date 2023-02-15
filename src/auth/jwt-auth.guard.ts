@@ -5,14 +5,17 @@ import {
   SetMetadata,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
+import { JwtService } from "@nestjs/jwt";
 import { AuthGuard } from "@nestjs/passport";
+import { RedisInstance } from "src/utils/redis";
 // @SkipAuth 跳过JWT验证
 @Injectable()
 export class JwtAuthGuard extends AuthGuard("jwt") {
-  constructor(private reflector: Reflector) {
+  constructor(private reflector: Reflector,
+    private jwtService: JwtService) {
     super();
   }
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -20,7 +23,31 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
     if (isPublic) {
       return true;
     }
-    return super.canActivate(context);
+    const request = context.switchToHttp().getRequest();
+    console.log('---re--',request);
+    const authorization = request["headers"].authorization || void 0;
+    let tokenNotTimeOut = true;
+    if (authorization) {
+      const token = authorization.split(" ")[1]; // authorization: Bearer xxx
+      try {
+        let payload: any = this.jwtService.decode(token);
+        const key = `${payload.id}-${payload.loginName}`;
+        const redis_token = await RedisInstance.getRedis(
+          "jwt-auth.guard.canActivate",
+          0,
+          key
+        );
+        if (!redis_token || redis_token !== token) {
+          throw new UnauthorizedException("请重新登录");
+        }
+      } catch (err) {
+        tokenNotTimeOut = false;
+        throw new UnauthorizedException("请重新登录");
+      }
+    }
+    
+    return  tokenNotTimeOut && (super.canActivate(context) as boolean);
+    // return super.canActivate(context);
   }
 
   handleRequest(err, user, info) {

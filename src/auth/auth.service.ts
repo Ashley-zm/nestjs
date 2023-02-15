@@ -3,6 +3,7 @@ import { JwtService } from "@nestjs/jwt";
 import { LoginUserDto } from "./dto/login-user.dto";
 import { Encrypt } from 'src/utils/crypto'
 import { UserService } from "../user/user.service";
+import { RedisInstance } from "src/utils/redis";
 
 const logger = new Logger("auth.service");
 
@@ -32,11 +33,17 @@ export class AuthService {
       // 加密
       const pass = Encrypt(password)
       if (pass === userInfo[0].password) {
+        const token = await this.createToken(userInfo[0]);
+
+        //存储token到redis
+        const redis = await RedisInstance.initRedis("auth.login", 0);
+        const key = `${userInfo[0].id}-${loginUserDto.loginName}`;
+        await RedisInstance.setRedis("auth.login", 0, key, `${token}`);
         data = {
           flag: true,
           msg: "登录成功",
           userId: userInfo[0],
-          token: await this.createToken(userInfo[0]),
+          token,
         };
       } else {
         data = { flag: false, msg: "用户名密码错误" };
