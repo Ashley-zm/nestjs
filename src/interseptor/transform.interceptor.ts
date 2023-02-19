@@ -12,8 +12,8 @@ export interface Response<T> {
 export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> {
   intercept(context: ExecutionContext, next: CallHandler): Observable<Response<T>> {
     const request = context.switchToHttp().getRequest<Request>()
-    console.log(request.url, '正常接口请求')
     return next.handle().pipe(map(data => {
+      console.log(request.url, '正常接口请求')
       let msg = ''
       switch (request.method) {
         case 'GET':

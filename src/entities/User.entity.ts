@@ -7,6 +7,7 @@ import {
 } from "typeorm";
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from "./UserRole.entity";
+import { Exclude } from "class-transformer";
 
 @Entity("user", { schema: "vite_node" })
 export class User extends BaseEntity {
@@ -14,8 +15,11 @@ export class User extends BaseEntity {
   @PrimaryGeneratedColumn({ type: "int", name: "id" })
   id: number;
 
+  // 表示select: false 查询user时不会返回这个字段，隐藏此列,也可以使用
+ // @Column("varchar", { name: "password", length: 255,select: false })
   @ApiProperty({ description: '密码' })
-  @Column("varchar", { name: "password", length: 255 })
+  @Exclude()
+  @Column("varchar", { name: "password", length: 255 }) // 表示select时隐藏此列
   password: string;
 
   @ApiProperty({ description: '性别' })
