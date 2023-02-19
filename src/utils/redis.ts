@@ -1,21 +1,19 @@
-import { Logger } from "@nestjs/common";
-import Redis from "ioredis";
+import { Logger } from '@nestjs/common';
+import Redis from 'ioredis';
 
-const logger = new Logger("auth.service");
+const logger = new Logger('auth.service');
 const redisIndex = []; // 用于记录 redis 实例索引
 const redisList = []; // 用于存储 redis 实例
 const redisOption = {
-  host: "127.0.0.1",
+  host: '127.0.0.1',
   port: 6379,
-  password: "password",
+  password: 'password',
 };
 export class RedisInstance {
   static async initRedis(method: string, db = 0) {
     const isExist = redisIndex.some((x) => x === db);
     if (!isExist) {
-      Logger.debug(
-        `[Redis ${db}]来自 ${method} 方法调用 `
-      );
+      Logger.debug(`[Redis ${db}]来自 ${method} 方法调用 `);
       redisList[db] = new Redis({ ...redisOption, db });
       redisIndex.push(db);
     } else {
@@ -29,9 +27,9 @@ export class RedisInstance {
     db = 0,
     key: string,
     val: string,
-    timeout = 60 * 60
+    timeout = 60 * 60,
   ) {
-    if (typeof val == "object") {
+    if (typeof val == 'object') {
       val = JSON.stringify(val);
     }
     const redis = await RedisInstance.initRedis(method, db);
@@ -51,4 +49,3 @@ export class RedisInstance {
     });
   }
 }
-

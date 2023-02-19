@@ -11,9 +11,9 @@ export class JoiValidationPipe implements PipeTransform {
   constructor(private schema: ObjectSchema) {}
 
   transform(value: any, metadata: ArgumentMetadata) {
-    console.log("管道验证",metadata);
+    console.log('管道验证', metadata);
     const { error } = this.schema.validate(value);
-    console.log("管道验证error",error.message);
+    console.log('管道验证error', error.message);
     if (error) {
       throw new BadRequestException('Validation failed-' + error);
     }

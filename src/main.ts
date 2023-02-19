@@ -5,11 +5,11 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 // 响应拦截器
-import { TransformInterceptor } from './interseptor/transform.interceptor'
+import { TransformInterceptor } from './interseptor/transform.interceptor';
 // 异常过滤器
-import { HttpExceptionFilter } from './interseptor/http-exception.filter'
+import { HttpExceptionFilter } from './interseptor/http-exception.filter';
 
-  //配置 swagger
+//配置 swagger
 const setupSwagger = (app) => {
   const config = new DocumentBuilder()
     .addBearerAuth()
@@ -29,7 +29,7 @@ const setupSwagger = (app) => {
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   // 挂载拦截器
-  app.useGlobalInterceptors(new TransformInterceptor())
+  app.useGlobalInterceptors(new TransformInterceptor());
   // 异常过滤器
   app.useGlobalFilters(new HttpExceptionFilter());
   // 传入app 访问http:localhost:3001/docs

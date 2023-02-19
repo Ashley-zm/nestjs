@@ -13,10 +13,10 @@ export class ClassValidationPipe implements PipeTransform<any> {
     if (!metatype || !this.toValidate(metatype)) {
       return value;
     }
-    
+
     const object = plainToClass(metatype, value);
     console.log(object);
-    
+
     const errors = await validate(object);
     if (errors.length > 0) {
       // 取出错误原因
