@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from '../entities/User.entity';
+import { Role } from '../entities/Role.entity';
+import { UserRole } from '../entities/UserRole.entity';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
@@ -45,21 +47,38 @@ export class UserService {
    * @returns 
    */
   async findAll(query: { keyWord: string, pageCurrent: number, pageSize: number }) {
+      const list = await this.userRepository.query(`
+      SELECT u.user_name userName,
+      u.login_name loginName,
+      u.id,
+      u.address,
+      u.password,
+      u.sex,
+      u.email,
+      r.RName roleName,
+      r.RID roleId from user u
+      LEFT JOIN user_role ur on u.id=ur.UserId
+      LEFT JOIN role r on ur.RoleId=r.RID
+      where u.login_name LIKE '%${query.keyWord}%' OR u.user_name LIKE '%${query.keyWord}%'
+      LIMIT ${(query.pageCurrent - 1) * query.pageSize}, ${query.pageSize}
+      `)    
     // async findAll(query: { keyWord: string, pageCurrent: number, pageSize: number }): Promise<User[]> {
-    const list = await this.userRepository.find({
-      where: [
-        { loginName: Like(`%${query.keyWord}%`) },
-        { userName: Like(`%${query.keyWord}%`) }
-      ],
-      order: {
-        id: "DESC"
-      },
-      skip: (query.pageCurrent - 1) * query.pageSize,
-      take: query.pageSize
-    })
+    // const list = await this.userRepository.find({
+    //   relations: [
+    //     'userRoles',
+    //   ],
+    //   where: [
+    //     { loginName: Like(`%${query.keyWord}%`) },
+    //     { userName: Like(`%${query.keyWord}%`) }
+    //   ],
+    //   order: {
+    //     id: "DESC"
+    //   },
+    //   skip: (query.pageCurrent - 1) * query.pageSize,
+    //   take: query.pageSize
+    // })
     const total = list.length
     return { list, total }
-    // return await this.userRepository.query('select * from user');
   }
 
   /**
@@ -74,6 +93,38 @@ export class UserService {
       }
     });
   }
+
+  /**
+   * @description: 根据id查找用户信息（角色）
+   * @param id 
+   * @returns 
+   */
+  async getUserRole(id: number) {
+    // 查询角色
+    const role = await this.userRepository.query(`select r.* from role r
+    INNER JOIN user_role ur ON ur.RoleId=r.RID
+    WHERE ur.UserId=${id}`);
+    const roleInfo = JSON.parse(JSON.stringify(role[0]))
+    // 根据角色id查菜单
+    const resourceInfo = await this.userRepository.query(`select m.code from menu m
+    INNER JOIN role_menu rm ON rm.MenuId=m.MenuId
+    WHERE rm.RoleId=${roleInfo.RID} and m.code is not null;`);
+    console.log(resourceInfo);
+    console.log(JSON.stringify(resourceInfo));
+    
+    const arr = resourceInfo.map((item: any) => {
+      return JSON.parse(JSON.stringify(item)).code
+    }).toString()
+    return {
+      roleInfo,
+      resourceInfo: arr
+    };
+  }
+  /**
+   * @description: 根据id查找用户信息
+   * @param id 
+   * @returns 
+   */
   async findOne(id: number) {
     return await this.userRepository.find({
       where: {
@@ -82,10 +133,21 @@ export class UserService {
     });
   }
 
+  /**
+   * @description 更新用户
+   * @param id 
+   * @param updateUserDto 
+   * @returns 
+   */
   update(id: number, updateUserDto: UpdateUserDto) {
     return this.userRepository.update(id, updateUserDto);
   }
 
+  /**
+   * @description 删除用户
+   * @param id 
+   * @returns 
+   */
   remove(id: number) {
     return this.userRepository.delete(id);
   }

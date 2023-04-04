@@ -34,6 +34,8 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   // 传入app 访问http:localhost:3001/docs
   setupSwagger(app);
+  // 跨域
+  app.enableCors()
 
   await app.listen(3001);
 }

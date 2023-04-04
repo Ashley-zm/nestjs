@@ -42,8 +42,8 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
       }
       return {
         data,
-        status: 200,
-        success: true,
+        code: 200,
+        flag: true,
         message: msg
       }
     }

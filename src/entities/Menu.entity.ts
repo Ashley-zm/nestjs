@@ -31,6 +31,14 @@ export class Menu extends BaseEntity {
   })
   isMenu: string | null;
 
+  @Column("varchar", {
+    name: "code",
+    nullable: true,
+    comment: "菜单code",
+    length: 255,
+  })
+  code: string | null;
+
   @OneToMany(() => RoleMenu, (roleMenu) => roleMenu.menu)
   roleMenus: RoleMenu[];
 }

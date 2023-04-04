@@ -31,22 +31,31 @@ export class AuthService {
         return;
       }
       // 加密
-      const pass = Encrypt(password)
-      if (pass === userInfo[0].password) {
+      // const pass = Encrypt(password)
+
+      // if (pass === userInfo[0].password) {
+      if (password === userInfo[0].password) {
         const token = await this.createToken(userInfo[0]);
 
         //存储token到redis
         const redis = await RedisInstance.initRedis("auth.login", 0);
         const key = `${userInfo[0].id}-${loginUserDto.loginName}`;
         await RedisInstance.setRedis("auth.login", 0, key, `${token}`);
+        
+        const roleMenuInfo = await this.userService.getUserRole(userInfo[0].id);
+        console.log('角色信息', roleMenuInfo);
+
         data = {
           flag: true,
           msg: "登录成功",
-          userId: userInfo[0],
+          user: {
+            userInfo: userInfo[0],
+            roleMenuInfo,
+          },
           token,
         };
       } else {
-        data = { flag: false, msg: "用户名密码错误" };
+        data = { flag: false, msg: "用户密码错误" };
       }
     } catch (error) {
       logger.log(error);
@@ -62,7 +71,11 @@ export class AuthService {
    * @returns 
    */
   private async createToken(loginUserDto: LoginUserDto) {
-    const payload = { loginName: loginUserDto.loginName, id: loginUserDto.id };
+    const payload = {
+      loginName: loginUserDto.loginName,
+      password: loginUserDto.password,
+      id: loginUserDto.id
+    };
     return this.jwtService.sign(payload);
   }
 }

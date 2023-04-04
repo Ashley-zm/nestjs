@@ -39,18 +39,19 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Get('findAllUser.do')
+  @Post('findAllUser.do')
   @ApiBearerAuth()
   @UseInterceptors(ClassSerializerInterceptor)//对应@Exclude()列隐藏
   @ApiOperation({ summary: '查找全部用户', description: '查找全部用户' })
   @ApiQuery({ name: 'keyWord', required: false })
-  findAll(@Query() query: { keyWord: string, pageCurrent: number, pageSize: number }) {
-    return this.userService.findAll(query);
+  findAll(@Body() data: { keyWord: string, pageCurrent: number, pageSize: number }) {
+    console.log(data)
+    return this.userService.findAll(data);
   }
 
   // @Bind(Param('id', new ParseIntPipe()))
   @Get('findOneUser.do')
-  @ApiOperation({ summary: '根据id查找用户', description: '根据id查找用户' })
+  @ApiOperation({ summary: '根据id查找用户信息', description: '根据id查找用户' })
   @ApiQuery({ name: 'id', required: true })
   findOne(@Query('id') id: number) {
     return this.userService.findOne(id);

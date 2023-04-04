@@ -1,7 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('role')
 export class RoleController {
@@ -12,7 +21,8 @@ export class RoleController {
     return this.roleService.create(createRoleDto);
   }
 
-  @Get()
+  @Get('getAllRoles.do')
+  @ApiOperation({ summary: '查询所有的角色', description: '查询所有的角色' })
   findAll() {
     return this.roleService.findAll();
   }

@@ -8,6 +8,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from "./UserRole.entity";
 import { Exclude } from "class-transformer";
+import { IsEnum } from "class-validator";
 
 @Entity("user", { schema: "vite_node" })
 export class User extends BaseEntity {
@@ -22,11 +23,17 @@ export class User extends BaseEntity {
   @Column("varchar", { name: "password", length: 255 }) // 表示select时隐藏此列
   password: string;
 
-  @ApiProperty({ description: '性别' })
+  @ApiProperty({ description: '性别',  example: 1,  required: false,  enum: [0, 1], }) 
+  @IsEnum(
+    { 女: 0, 男: 1 },
+    {
+      message: ' sex 只能传入数字0或1',
+    },
+  )
   @Column("int", { default: 1, name: "sex",})
   sex?: number;
 
-  @ApiProperty({ description: '邮箱' })
+  @ApiProperty({ description: '邮箱',  required: false })
   @Column("varchar", { name: "email", nullable: true, length: 255 })
   email: string | null;
 

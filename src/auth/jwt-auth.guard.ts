@@ -24,11 +24,12 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
       return true;
     }
     const request = context.switchToHttp().getRequest();
-    console.log('---re--',request);
-    const authorization = request["headers"].authorization || void 0;
+    // console.log('---re--',request);
+    const Authorization = request["headers"].Authorization || void 0;
+    
     let tokenNotTimeOut = true;
-    if (authorization) {
-      const token = authorization.split(" ")[1]; // authorization: Bearer xxx
+    if (Authorization) {
+      const token = Authorization.split(" ")[1]; // Authorization: Bearer xxx
       try {
         let payload: any = this.jwtService.decode(token);
         const key = `${payload.id}-${payload.loginName}`;

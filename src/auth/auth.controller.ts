@@ -1,4 +1,5 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { validate } from 'class-validator';
+import { Body, Controller, Get, Post } from "@nestjs/common";
 import { ApiBody, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { LoginUserDto } from "./dto/login-user.dto";
 import { AuthService } from "./auth.service";
@@ -17,6 +18,13 @@ export class AuthController {
   })
   async loginUser(@Body() loginUserDto: LoginUserDto) {
     return await this.authService.login(loginUserDto);
+  }
+  @Get('validateToken.do')
+  async validateToken(){
+    const data={
+      state:true
+    }
+    return data
   }
 }
 
